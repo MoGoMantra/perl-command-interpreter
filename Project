@@ -1,0 +1,40 @@
+#!/usr/bin/perl      
+# The first line of the script envokes Perl 
+# Use "/usr/bin/perl -w" option for debugging
+
+# Scalar variables
+$var1 = "Hello World";   
+$var2 = 14.6;
+
+# Array variables
+@arr1 = (0,1,2,3,4);
+@arr2 = ("zero","one","two","three","four");
+
+# Hash variable, or associative array
+%hash1 = ("one","Monday","two", "Tuesday","three", "Wednesday","four","Thursday");
+
+
+# Some simple printing examples
+
+print $var1;   # Printing out Scalar Variables
+print (" ",$var2,"\n");
+
+
+my $key;
+ReadMode 4;  # Turn off controls keys
+while (not defined ($key = ReadKey(-1))) {
+   # No key yet
+}
+if (ord($key) != 27) {
+   print "Got key $key\n";
+} elsif ($key = ReadKey(-1) and $key ne '[') {
+   print "Not sure what I have...\n"
+} else {
+   $key = ReadKey(-1);
+   if ($key eq 'A') { print "UP pressed.\n" }
+   elsif ($key eq 'B') { print "DOWN pressed.\n" }
+   elsif ($key eq 'C') { print "RIGHT pressed.\n" }
+   elsif ($key eq 'D') { print "LEFT pressed.\n" }
+   else { print "Not sure what I have...\n" }
+}
+ReadMode 0; # Reset tty mode before exiting
