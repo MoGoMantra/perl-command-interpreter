@@ -1,0 +1,15 @@
+#!/usr/bin/perl      
+
+use Term::RawInput;
+
+   my $prompt='PROMPT : ';
+   my ($input,$key)=('','');
+   ($input,$key)=rawInput($prompt);
+
+   print "\nRawInput=$input" if $input;
+   print "\nKey=$key\n" if $key;
+
+   print "Captured F1\n" if $key eq 'F1';
+   print "Captured ESCAPE\n" if $key eq 'ESCAPE';
+   print "Captured DELETE\n" if $key eq 'DELETE';
+   print "Captured PAGEDOWN\n" if $key eq 'PAGEDOWN'; 

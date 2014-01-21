@@ -1,0 +1,173 @@
+#!/usr/bin/perl      
+# The first line of the script envokes Perl 
+# Use "/usr/bin/perl -w" option for debugging
+
+use strict;
+use warnings;
+#save home directory in a variable
+my $home = $ENV{'HOME'};
+#print "Home = $home \n";
+
+#my $prompt = 'mogomantra>';
+#print $prompt;
+
+# read the commands
+my $pathsep = "/";
+my @results;
+my $prompt='mogomantra :> ';
+my @cmdHistory = {};
+my $i=0;
+my $lastCmdIndex = -1;
+
+
+use constant FALSE => 0;
+use constant TRUE  => 1;
+
+use Term::RawInput;
+while(1) {
+   my ($input,$key)=('','');
+   ($input,$key)=rawInput($prompt);
+
+   if($key eq 'ENTER' and $input) {
+   		my $cmdRetValue = &runCommand($input);
+			if($cmdRetValue eq FALSE) {
+				last;
+			}
+			$cmdHistory[$i++] = $input;
+			$lastCmdIndex = 0;
+			
+   }
+   elsif ($key eq 'UPARROW' or $key eq 'DOWNARROW') {
+   		my $message;
+	   	if ($key eq 'UPARROW') { 
+	   		#print "UP pressed.\n";
+	   		$lastCmdIndex--;
+	   		$message = "No more command in commandHistory for up arrow\n";
+	   	}
+	   	elsif ($key eq 'DOWNARROW') { 
+   			#print "DOWN pressed.\n"; 
+   			$lastCmdIndex++;
+   			$message = "No more command in commandHistory for down arrow\n";
+   		}
+   		#print "lastCmdIndex = $lastCmdIndex\n";
+   		
+   		if($i eq 0) {
+   			$lastCmdIndex = 0;
+   			print "No command in commandHistory \n";
+   		}
+   		#Check for upper bound and lower bound of command history array
+   		elsif (-$lastCmdIndex gt $i or $lastCmdIndex ge 0) {
+   			#$lastCmdIndex = 0;
+   			print "$message";
+   		}
+   		elsif(-$lastCmdIndex le $i) {
+   			my $lastCmd = $cmdHistory[$lastCmdIndex];
+   			#print "$lastCmd";
+   			#$cmdName = $lastCmd;
+   			&runCommand($lastCmd);
+   		}
+   
+   }
+   elsif ($key eq 'RIGHTARROW') { print "RIGHT pressed.\n" }
+   elsif ($key eq 'LEFTARROW') { print "LEFT pressed.\n" }
+   
+}
+
+#print "@cmdHistory \n";
+print "\n";
+
+sub runCommand{
+	my ($commandName) = @_;
+	print $commandName;
+    chomp $commandName;
+
+    if(length($commandName) gt 0) {
+    	
+    	# Execute the commands to exit the Shell
+	    if($commandName eq "stop"
+	    	or $commandName eq "quit"
+	    	or $commandName eq "exit"
+	    	or $commandName eq "bye") {
+	    	return FALSE;
+	    }
+	    # Execute ls commands
+	    elsif((split(' ', $commandName))[0] eq "ls" ) {
+		 	my @values = split(' ', $commandName);
+	 		my $cmd;
+
+	 		#default Directory - PWD
+	 		my $dirName = `pwd`;
+	 		if(@values gt 1) {
+	 			# if command is ls -al $dirName - pick dir name
+	 			if($values[1] eq '-al' and @values eq 3) {
+	 				$dirName=$values[2];
+	 			}
+	 			# if command is ls $dirName - pick dir name
+	 			elsif($values[1] ne '-al' and @values eq 2) {
+	 				$dirName=$values[1];
+	 			} 
+	 		}
+	 		
+	 		# Contruct the command
+	    	if ($dirName eq "projects") {
+		     	$cmd = "ls -al $home$pathsep$dirName";
+	    	}
+	    	elsif ($dirName eq "clients") {
+		     	$cmd = "ls -al $home$pathsep"."projects"."$pathsep$dirName";
+	    	}
+	    	else {
+	    		$cmd = "ls -al $dirName";
+	    	}
+	    	
+	    	#execute the command
+	    	print "\ncmd = $cmd\n";
+		    @results = `$cmd`;
+	    	print @results;
+	    }
+	    # Run the cd command
+	    elsif((split(' ', $commandName))[0] eq "cd" ) {
+		 	my @values = split(' ', $commandName);
+	 		my $cmd;
+	 		if (@values gt 1) {
+		    	if ($values[1] eq "projects") {
+			     	$cmd = "$home$pathsep$values[1]";
+		    	}
+		    	elsif ($values[1] eq "clients") {
+			     	$cmd = "$home$pathsep"."projects".$pathsep."$values[1]";
+		    	}
+		    }
+		    else {
+				$cmd = "$home";
+		    }
+		    
+		    # Execute the change directory command
+	    	print "\ncmd = cd $cmd\n";
+	    	chdir($cmd);
+	    }
+	    # Execute cls command
+	  	elsif($commandName eq "cls") {
+	    	my $cmd = "clear";
+	    	print "\ncmd = $cmd\n";
+	    	@results = `$cmd`;
+	    	print @results;
+	    }
+	    # Print command History
+	    elsif($commandName eq "history" or $commandName eq "hist") {
+	    	print "\nCmd History = \n";
+	    	foreach (@cmdHistory) {
+ 				print "\t".$_ . "\n";
+ 			} 
+	    }
+	    # Run the command using shell
+	    else {
+	    	my $cmd = "$commandName";
+	    	print "\ncmd = $cmd\n";
+		    @results = `$cmd`;
+		    print @results;
+	    }
+    }
+    #print $prompt;
+    return TRUE;
+}
+
+

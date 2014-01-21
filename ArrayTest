@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+
+@days = qw/Mon Tue Wed Thu Fri Sat Sun/;
+
+@weekdays = @days[3,4,5];
+
+print "@weekdays\n";
+
+my $i = 0;
+print "$days[$i++]\n";
+print "$days[$i++]\n";
+print "$days[2]\n";
+print "$days[6]\n";
+print "$days[-1]\n";
+print "$days[-7]\n";

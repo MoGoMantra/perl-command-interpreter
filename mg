@@ -20,16 +20,18 @@ my $home = $ENV{'HOME'};
 my $prompt = 'mogomantra>';
 print $prompt;
 
-#use constant FALSE => 0;
-#use constant TRUE  => 1;
+use constant FALSE => 0;
+use constant TRUE  => 1;
 
 # read the commands
 my $pathsep = "/";
 my @results;
 my $cmdName;
-my $arrowCount = 0;
+my $lastCmdIndex = 0;
 my $i=0;
 my @cmdList = {};
+my $cmdRetValue;
+#my $lastCmd;
 
 ReadMode 4;  # Turn off controls keys
 while(1) {
@@ -38,40 +40,63 @@ while(1) {
 	   # No key yet
 	}
 	
+	# Capture ^C or ^D keys to exit the interpreter	
 	if(ord($key) eq 3 or ord($key) eq 4) {
 		print "\n";
-		#exit 1;
-		#last;
+		last;
 	}
+	
+	# Capture any other key and create the command
 	if (ord($key) != 27) {
 	   #print "Got key ".ord($key)."\n";
 	   print $key;
-	   $cmdName = $cmdName.$key;
-	   if(ord($key) eq 10) {
-			#$commandName = <STDIN>;
-			#print "cmd = $cmdName";
-			&runCommand($cmdName);
-			#my $rt = &runCommand($cmdName);
-			#print $rt;
-			#if(&runCommand($cmdName) eq FALSE) {
-				#last;
-			#}
+	   
+	   #Don't add the new line charactor to command
+	   if(ord($key) ne 10) {
+	   		$cmdName = $cmdName.$key;
 	   }
-	   $cmdList[$i++] = $cmdName;
-	   $arrowCount = 0;
+	   
+	   # Capture enter key to execute the command
+	   if(ord($key) eq 10) {
+			$cmdRetValue = &runCommand($cmdName);
+			if($cmdRetValue eq FALSE) {
+				last;
+			}
+		   $cmdList[$i++] = $cmdName;
+		   $cmdName = "";
+		   
+		   #Assign the last command index. Perl allows to track array elements in reverse order.
+		   $lastCmdIndex = -1;
+	   }
 	} elsif ($key = ReadKey(-1) and $key ne '[') {
 	   print "Not sure what I have...\n"
 	} else {
 	   $key = ReadKey(-1);
 	   if ($key eq 'A') { 
-	   		#print "UP pressed.\n"; 
-	   		print $cmdList[$#cmdList - $arrowCount];
-	   		$arrowCount++;
+	   		#print "UP pressed.\n";
+	   		if($i ge -$lastCmdIndex) {
+	   			my $lastCmd = $cmdList[$lastCmdIndex];
+	   			print "$lastCmd";
+	   			$cmdName = $lastCmd;
+	   			$lastCmdIndex--;
+	   		}else {
+	   			my $lastCmd = $cmdList[0];
+	   			print "$lastCmd";
+	   			$cmdName = $lastCmd;  			
+	   		}
 	   	}
 	   elsif ($key eq 'B') { 
 	   		#print "DOWN pressed.\n"; 
-	   		$arrowCount--;
-	   		print $cmdList[$#cmdList - $arrowCount];
+	   		if($i ge -$lastCmdIndex) {
+	   			my $lastCmd = $cmdList[$lastCmdIndex];
+	   			print "$lastCmd";
+	   			$cmdName = $lastCmd;
+	   			$lastCmdIndex++;
+	   		}else {
+	   			my $lastCmd= $cmdList[-$i];
+	   			print "$lastCmd";
+	   			$cmdName = $lastCmd;
+	   		}
 	   	}
 	   elsif ($key eq 'C') { print "RIGHT pressed.\n" }
 	   elsif ($key eq 'D') { print "LEFT pressed.\n" }
@@ -93,16 +118,16 @@ sub runCommand{
 
     if(length($commandName) gt 0) {
 	    if($commandName eq "STOP") {
-	    	#return FALSE;
+	    	return FALSE;
 	    }
 	    elsif($commandName eq "quit") {
-	    	#return FALSE;
+	    	return FALSE;
 	    }
 	    elsif($commandName eq "exit") {
-	    	#return FALSE;
+	    	return FALSE;
 	    }
 	    elsif($commandName eq "bye") {
-	    	#return FALSE;
+	    	return FALSE;
 	    }
 	    elsif($commandName eq "ls projects") {
 	    	my @values = split(' ', $commandName);
@@ -177,7 +202,7 @@ sub runCommand{
     }
     
     print $prompt;
-    #return TRUE;
+    return TRUE;
 }
 
 
